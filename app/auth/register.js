@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { auth } from "../../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons"; // Импорт иконки для стрелки назад
-
+import {router} from "expo-router";
 const Register = () => {
   const navigation = useNavigation();
+ 
+ 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,6 +22,10 @@ const Register = () => {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      // После успешной регистрации перенаправляем на страницу входа
+      console.log('Успешная регистрация');
+      
+      router.push("auth/login");
     } catch (err) {
       setError("Ошибка регистрации. Попробуйте снова.");
     }

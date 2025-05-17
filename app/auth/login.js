@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { auth } from "../../firebase/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
-
+import {router} from "expo-router";
 const Login = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState("");
@@ -25,7 +25,8 @@ const Login = () => {
       console.log("Попытка входа в Firebase...");
       await signInWithEmailAndPassword(auth, email, password);
       console.log("Успешный вход!");
-      // Навигацию больше не вызываем, App.js сам определит нужный экран
+
+      router.replace("/(tabs)/ProfileScreen");
     } catch (err) {
       console.error("Ошибка входа:", err.message);
       setError(err.message);
