@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 
-// Определяем тип для допустимых имен иконок
 type MaterialIconName = React.ComponentProps<typeof MaterialIcons>['name'];
 
 export default function TabLayout() {
@@ -10,17 +9,16 @@ export default function TabLayout() {
     <Tabs
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => {
-          let iconName: MaterialIconName;
+          // Убираем дефолтную иконку - оставляем только явные случаи
+          const iconMap: Record<string, MaterialIconName> = {
+            "index": "home",
+            "explore": "search",
+            "ProfileScreen": "person"
+          };
 
-          if (route.name === "index") {
-            iconName = "home";
-          } else if (route.name === "explore") {
-            iconName = "search";
-          } else if (route.name === "ProfileScreen") {
-            iconName = "person";
-          } else {
-            iconName = "help-outline"; // дефолтная иконка
-          }
+          const iconName = iconMap[route.name];
+          
+          if (!iconName) return null; // Не отображаем иконку для неизвестных роутов
 
           return (
             <View style={styles.iconWrapper}>
@@ -53,11 +51,16 @@ const styles = StyleSheet.create({
     elevation: 10,
     shadowOpacity: 0.1,
     shadowRadius: 10,
+    // Добавляем фиксированную ширину для таб-бара
+    width: '100%',
+    alignSelf: 'center'
   },
   tabItem: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    // Добавляем максимальную ширину для элементов
+    maxWidth: '33.33%' // Для 3 иконок
   },
   iconWrapper: {
     width: '100%',
