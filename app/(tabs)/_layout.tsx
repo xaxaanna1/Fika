@@ -28,6 +28,7 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: styles.tabBar,
+        tabBarItemStyle: styles.tabItem, // Добавлено для центрирования
       })}
     >
       <Tabs.Screen name="index" />
@@ -46,8 +47,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
   },
-  iconWrapper: {
+  tabItem: { // Новый стиль для элементов вкладок
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  iconWrapper: {
+    width: '100%', // Занимает всю ширину родителя
+    height: '100%', // Занимает всю высоту родителя
     justifyContent: "center",
     alignItems: "center",
   },
