@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Alice_400Regular } from '@expo-google-fonts/alice';
 import { ProgressBar, Chip, IconButton } from 'react-native-paper';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
@@ -27,17 +28,17 @@ interface Product {
 }
 
 const initialProducts: Product[] = [
-  { id: 1, name: 'Персик', category: 'Чай', volume: 500, remaining: 300, image: require('../../assets/images/peach-tea.jpg') },
-  { id: 2, name: 'Латте', category: 'Кофе', volume: 250, remaining: 50, image: require('../../assets/images/latte.png') },
-  { id: 3, name: 'Малина', category: 'Чай', volume: 1000, remaining: 800, image: require('../../assets/images/raspberry-tea.jpg') },
-  { id: 4, name: 'Лайм', category: 'Чай', volume: 200, remaining: 200, image: require('../../assets/images/lime-tea.jpg') },
-  { id: 5, name: '3в1', category: 'Кофе', volume: 1000, remaining: 700, image: require('../../assets/images/coffee-mix.jpg') },
-  { id: 6, name: 'Сахар белый', category: 'Сахар', volume: 1000, remaining: 400, image: require('../../assets/images/sugar-white.jpg') },
-  { id: 7, name: 'Сахар тростниковый', category: 'Сахар', volume: 500, remaining: 250, image: require('../../assets/images/sugar-brown.jpg') },
-  { id: 8, name: 'Гречка', category: 'Крупы', volume: 900, remaining: 600, image: require('../../assets/images/buckwheat.jpg') },
-  { id: 9, name: 'Рис', category: 'Крупы', volume: 1000, remaining: 300, image: require('../../assets/images/rice.jpg') },
-  { id: 10, name: 'Мука пшеничная', category: 'Мука', volume: 2000, remaining: 800, image: require('../../assets/images/wheat-flour.jpg') },
-  { id: 11, name: 'Мука ржаная', category: 'Мука', volume: 1000, remaining: 100, image: require('../../assets/images/rye-flour.jpg') },
+  { id: 1, name: 'Персик', category: 'Чай', volume: 500, remaining: 0, image: require('../../assets/images/peach-tea.jpg') },
+  { id: 2, name: 'Латте', category: 'Кофе', volume: 250, remaining: 0, image: require('../../assets/images/latte.png') },
+  { id: 3, name: 'Малина', category: 'Чай', volume: 1000, remaining: 0, image: require('../../assets/images/raspberry-tea.jpg') },
+  { id: 4, name: 'Лайм', category: 'Чай', volume: 200, remaining: 0, image: require('../../assets/images/lime-tea.jpg') },
+  { id: 5, name: '3в1', category: 'Кофе', volume: 1000, remaining: 0, image: require('../../assets/images/coffee-mix.jpg') },
+  { id: 6, name: 'Сахар белый', category: 'Сахар', volume: 1000, remaining: 0, image: require('../../assets/images/sugar-white.jpg') },
+  { id: 7, name: 'Сахар тростниковый', category: 'Сахар', volume: 500, remaining: 0, image: require('../../assets/images/sugar-brown.jpg') },
+  { id: 8, name: 'Гречка', category: 'Крупы', volume: 900, remaining: 0, image: require('../../assets/images/buckwheat.jpg') },
+  { id: 9, name: 'Рис', category: 'Крупы', volume: 1000, remaining: 0, image: require('../../assets/images/rice.jpg') },
+  { id: 10, name: 'Мука пшеничная', category: 'Мука', volume: 2000, remaining: 0, image: require('../../assets/images/wheat-flour.jpg') },
+  { id: 11, name: 'Мука ржаная', category: 'Мука', volume: 1000, remaining: 0, image: require('../../assets/images/rye-flour.jpg') },
 ];
 
 const categories = ['Все', 'Кофе', 'Чай', 'Крупы', 'Сахар', 'Мука'];
@@ -53,6 +54,41 @@ export default function ExploreScreen() {
   let [fontsLoaded] = useFonts({
     Alice_400Regular,
   });
+
+  // Загрузка сохраненных продуктов
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const savedProducts = await AsyncStorage.getItem('userProducts');
+        if (savedProducts) {
+          const parsedProducts = JSON.parse(savedProducts);
+          // Объединяем с initialProducts чтобы сохранить все поля
+          const mergedProducts = initialProducts.map(product => {
+            const savedProduct = parsedProducts.find((p: Product) => p.id === product.id);
+            return savedProduct ? { ...product, remaining: savedProduct.remaining } : product;
+          });
+          setProducts(mergedProducts);
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки продуктов:', error);
+      }
+    };
+    
+    loadProducts();
+  }, []);
+
+  // Сохранение продуктов при изменении
+  useEffect(() => {
+    const saveProducts = async () => {
+      try {
+        await AsyncStorage.setItem('userProducts', JSON.stringify(products));
+      } catch (error) {
+        console.error('Ошибка сохранения продуктов:', error);
+      }
+    };
+    
+    saveProducts();
+  }, [products]);
 
   if (!fontsLoaded) {
     return null; // можно отобразить <Text>Загрузка шрифта...</Text>
@@ -81,7 +117,7 @@ export default function ExploreScreen() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleConsume = (productId: number, amount: number) => {
+const handleConsume = async (productId: number, amount: number) => {
     setProducts(prevProducts => 
       prevProducts.map(product => {
         if (product.id === productId) {
@@ -103,7 +139,7 @@ export default function ExploreScreen() {
     );
   };
 
-  const handleAdd = (productId: number, amount: number) => {
+  const handleAdd = async (productId: number, amount: number) => {
     setProducts(prevProducts =>
       prevProducts.map(product => {
         if (product.id === productId) {
@@ -116,6 +152,7 @@ export default function ExploreScreen() {
       })
     );
   };
+
 
   const handleDelete = (productId: number) => {
     Alert.alert(
@@ -161,7 +198,7 @@ export default function ExploreScreen() {
     const progressColor = isCritical ? '#ff5252' : progress > 0.5 ? '#4caf50' : '#ff9800';
 
     return (
-      <Animated.View style={{ transform: [{ translateX: shakeAnim }], marginBottom: 16 }}>
+    <Animated.View style={{ transform: [{ translateX: shakeAnim }], marginBottom: 8 }}>
         <Swipeable
           renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, item.id)}
           overshootRight={false}
@@ -383,29 +420,30 @@ title: {
   productCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 8, // Уменьшили с 16 до 8
     flexDirection: 'row',
     overflow: 'hidden',
     elevation: 2,
+    width: '100%',
   },
   criticalProduct: {
     borderLeftWidth: 4,
     borderLeftColor: '#ff5252',
   },
-  productImage: {
-    width: 100,
-    height: 120,
-    resizeMode: 'cover',
-  },
+productImage: {
+  flex: 1,
+  height: 120,
+  resizeMode: 'cover',
+},
   productInfo: {
-    flex: 1,
-    padding: 12,
+    flex: 2,
+    padding: 10,
   },
-  productHeader: {
+productHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6, // Уменьшили с 8 до 6
   },
   productName: {
     fontSize: 18,
@@ -414,7 +452,7 @@ title: {
   },
   categoryChip: {
     alignSelf: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 8,
     backgroundColor: 'transparent',
     borderColor: '#d7ccc8',
   },
@@ -425,12 +463,12 @@ title: {
     fontWeight: '500',
   },
   progressContainer: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   remainingText: {
     fontSize: 14,
     color: '#8d6e63',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   progressBar: {
     height: 6,
@@ -441,11 +479,12 @@ title: {
     fontSize: 12,
     color: '#8d6e63',
     textAlign: 'right',
-    marginTop: 4,
+    marginTop: 2,
   },
   buttonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 4,
   },
   actionButton: {
     flexDirection: 'row',
@@ -501,6 +540,6 @@ title: {
     textAlign: 'center',
   },
   listContent: {
-    paddingBottom: 20,
+    paddingBottom: 12,
   },
 });
