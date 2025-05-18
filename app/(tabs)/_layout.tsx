@@ -1,26 +1,33 @@
 import { Tabs } from "expo-router";
-import { Image, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { MaterialIcons } from '@expo/vector-icons';
+
+// Определяем тип для допустимых имен иконок
+type MaterialIconName = React.ComponentProps<typeof MaterialIcons>['name'];
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => {
-          let icon;
-          if (route.name === "index") icon = require("../../assets/icons/home.png");
-          if (route.name === "explore") icon = require("../../assets/icons/search.png");
-          if (route.name === "ProfileScreen") icon = require("../../assets/icons/Profile.png");
+          let iconName: MaterialIconName;
+
+          if (route.name === "index") {
+            iconName = "home";
+          } else if (route.name === "explore") {
+            iconName = "search";
+          } else if (route.name === "ProfileScreen") {
+            iconName = "person";
+          } else {
+            iconName = "help-outline"; // дефолтная иконка
+          }
 
           return (
             <View style={styles.iconWrapper}>
-              <Image
-                source={icon}
-                style={{
-                  width: 28,
-                  height: 28,
-                  tintColor: focused ? "#FF6347" : "#4E4E4E",
-                }}
-                resizeMode="contain"
+              <MaterialIcons 
+                name={iconName} 
+                size={35} 
+                color={focused ? "#FF6347" : "#4E4E4E"} 
               />
             </View>
           );
@@ -28,7 +35,7 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarItemStyle: styles.tabItem, // Добавлено для центрирования
+        tabBarItemStyle: styles.tabItem,
       })}
     >
       <Tabs.Screen name="index" />
@@ -47,14 +54,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
   },
-  tabItem: { // Новый стиль для элементов вкладок
+  tabItem: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   iconWrapper: {
-    width: '100%', // Занимает всю ширину родителя
-    height: '100%', // Занимает всю высоту родителя
+    width: '100%',
+    height: '100%',
     justifyContent: "center",
     alignItems: "center",
   },
