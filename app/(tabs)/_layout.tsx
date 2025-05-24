@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Image, View, StyleSheet, Platform } from "react-native";
+import { Image, View, StyleSheet, Platform, Dimensions } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -11,8 +11,9 @@ export default function TabLayout() {
           if (route.name === "explore") icon = require("../../assets/icons/search.png");
           if (route.name === "ProfileScreen") icon = require("../../assets/icons/Profile.png");
 
+          // Use a completely different approach with fixed positioning
           return (
-            <View style={styles.tabIconContainer}>
+            <View style={styles.tabBarItemContainer}>
               <Image
                 source={icon}
                 style={[
@@ -47,21 +48,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
   },
-  tabIconContainer: {
-    alignItems: 'center',     
-    justifyContent: 'center', 
-    width: '100%',            
-    height: '100%',
-    // Add these properties to fix centering issues in production builds
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: Platform.OS === 'android' ? 4 : 0, // Adjust for Android specifically
+  tabBarItemContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    minHeight: 40,
+    minWidth: 40,
+    backgroundColor: 'transparent',
   },
   tabIcon: {
     width: 24,
     height: 24,
-    // Remove marginBottom and use position adjustments instead
   },
 });
