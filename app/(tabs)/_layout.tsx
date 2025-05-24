@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Image, View, StyleSheet } from "react-native";
+import { Image, View, StyleSheet, Platform } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -48,14 +48,20 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   tabIconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    alignItems: 'center',     
+    justifyContent: 'center', 
+    width: '100%',            
     height: '100%',
+    // Add these properties to fix centering issues in production builds
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: Platform.OS === 'android' ? 4 : 0, // Adjust for Android specifically
   },
   tabIcon: {
     width: 24,
     height: 24,
-    marginBottom: 4,
+    // Remove marginBottom and use position adjustments instead
   },
 });
